@@ -1,0 +1,35 @@
+name: Build SOUQ Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Extract project
+        run: unzip -q SOUQ_Deutschland_Flutter_Starter.zip -d .
+
+      - name: Get dependencies
+        working-directory: souq_deutschland
+        run: flutter pub get
+
+      - name: Build APK
+        working-directory: souq_deutschland
+        run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SOUQ-Deutschland-APK
+          path: souq_deutschland/build/app/outputs/flutter-apk/app-release.apk
