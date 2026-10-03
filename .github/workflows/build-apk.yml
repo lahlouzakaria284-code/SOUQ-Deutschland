@@ -1,10 +1,10 @@
-
 name: Build SOUQ Android APK
 
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -12,29 +12,56 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
 
       - name: Extract project
-        run: unzip -q SOUQ_Deutschland_Flutter_Starter.zip -d .
+        run: |
+          unzip -q SOUQ_Deutschland_Flutter_Starter.zip -d .
+
+      - name: Check project
+        run: |
+          test -f souq_deutschland/pubspec.yaml
+          test -f souq_deutschland/lib/main.dart
 
       - name: Generate Android platform
         working-directory: souq_deutschland
-        run: flutter create --platforms=android --project-name=souq_deutschland --org=de.souq .
+        run: |
+          flutter create \
+            --platforms=android \
+            --project-name=souq_deutschland \
+            --org=de.souq .
 
       - name: Get dependencies
         working-directory: souq_deutschland
         run: flutter pub get
 
-      - name: Build APK
+      - name: Build Debug APK
+        working-directory: souq_deutschland
+        run: flutter build apk --debug
+
+      - name: Build Release APK
         working-directory: souq_deutschland
         run: flutter build apk --release
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
         with:
-          name: SOUQ-Deutschland-APK
+          name: SOUQ-Deutschland-Debug-APK
+          path: souq_deutschland/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SOUQ-Deutschland-Release-APK
           path: souq_deutschland/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
