@@ -1,35 +1,21 @@
 workflows:
   souq-android:
     name: SOUQ Deutschland Android
-    instance_type: linux_x2
     max_build_duration: 60
 
     environment:
       flutter: stable
 
     scripts:
-      - name: Extract Flutter project
-        script: |
-          rm -rf souq_deutschland
-          unzip -q SOUQ_Deutschland_Flutter_Starter.zip -d .
-          test -f souq_deutschland/pubspec.yaml
-          test -f souq_deutschland/lib/main.dart
+      - name: Install dependencies
+        script: flutter pub get
 
-      - name: Get dependencies
-        script: |
-          cd souq_deutschland
-          flutter pub get
+      - name: Build Release APK
+        script: flutter build apk --release
 
-      - name: Build release APK
-        script: |
-          cd souq_deutschland
-          flutter build apk --release
-
-      - name: Build Google Play AAB
-        script: |
-          cd souq_deutschland
-          flutter build appbundle --release
+      - name: Build Release AAB
+        script: flutter build appbundle --release
 
     artifacts:
-      - souq_deutschland/build/app/outputs/flutter-apk/*.apk
-      - souq_deutschland/build/app/outputs/bundle/release/*.aab
+      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/bundle/release/app-release.aab
