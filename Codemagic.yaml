@@ -1,4 +1,4 @@
-workflows:
+workflows
   souq-android:
     name: SOUQ Deutschland Android
     max_build_duration: 60
